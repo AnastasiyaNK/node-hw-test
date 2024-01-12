@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
+
 const {
   registerUserSchema,
   User,
@@ -79,7 +80,7 @@ router.post("/login", async (req, res, next) => {
 
 router.post("/logout", authenticate, async (req, res, next) => {
   const { _id } = req.user;
-  await User.findByIdAndUpdate({ token: "" });
+  await User.findByIdAndUpdate(_id, { token: "" });
 
   res.status(204).json({ message: "No Content" });
 });

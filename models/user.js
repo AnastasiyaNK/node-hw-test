@@ -3,14 +3,26 @@ const Joi = require("joi");
 const { model, Schema } = require("mongoose");
 
 const registerUserSchema = Joi.object({
-  password: Joi.string().min(6).required(),
-  email: Joi.string().email().required(),
+  password: Joi.string()
+    .min(6)
+    .required()
+    .messages({ "any.required": "missing required password field" }),
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({ "any.required": "missing required email field" }),
   subscription: Joi.string().allow("starter", "pro", "business"),
 });
 
 const loginUserSchema = Joi.object({
-  password: Joi.string().min(6).required(),
-  email: Joi.string().email().required(),
+  password: Joi.string()
+    .min(6)
+    .required()
+    .messages({ "any.required": "missing required password field" }),
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({ "any.required": "missing required email field" }),
 });
 
 const userSchema = new Schema(

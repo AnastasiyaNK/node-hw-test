@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 const { User } = require("../models/user");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const { JWT_SECRET } = process.env;
 
@@ -13,9 +15,10 @@ const authenticate = async (req, res, next) => {
     return;
   }
   try {
-    const { id } = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(id);
-    if (!user) {
+    const { _id } = jwt.verify(token, JWT_SECRET);
+
+    const user = await User.findById(_id);
+    if (!user || !user.token || user.token !== token) {
       res.status(401).json({ message: "Not authorized" });
       return;
     }
@@ -26,4 +29,4 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = authenticate;
+module.exports = { authenticate };

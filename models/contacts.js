@@ -3,14 +3,22 @@ const Joi = require("joi");
 const { model, Schema } = require("mongoose");
 
 const contactBodySchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().required(),
+  name: Joi.string()
+    .required()
+    .messages({ "any.required": "missing required name field" }),
+  email: Joi.string()
+    .required()
+    .messages({ "any.required": "missing required email field" }),
+  phone: Joi.string()
+    .required()
+    .messages({ "any.required": "missing required phone field" }),
   favorite: Joi.boolean(),
 });
 
 const favoriteBodySchema = Joi.object({
-  favorite: Joi.boolean().required(),
+  favorite: Joi.boolean()
+    .required()
+    .messages({ "any.required": "missing required favorite field" }),
 });
 
 const contactsSchema = new Schema(
