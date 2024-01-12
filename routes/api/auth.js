@@ -6,6 +6,7 @@ const {
   User,
   loginUserSchema,
 } = require("../../models/user");
+const { authenticate } = require("../../middlewares/authenticate");
 
 const router = express.Router();
 
@@ -74,6 +75,19 @@ router.post("/login", async (req, res, next) => {
   } catch (err) {
     res.status(401).json({ message: "Email or password is wrong" });
   }
+});
+
+router.post("/logout", authenticate, async (req, res, next) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate({ token: "" });
+
+  res.status(204).json({ message: "No Content" });
+});
+
+router.get("/current", authenticate, async (req, res, next) => {
+  const { name, email } = req.user;
+
+  res.json({ name, email });
 });
 
 module.exports = router;

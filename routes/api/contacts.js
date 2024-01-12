@@ -9,7 +9,8 @@ const { isValidObjectId } = require("mongoose");
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
-  const contacts = await Contact.find();
+  const { _id: owner } = req.user;
+  const contacts = await Contact.find({ owner });
   res.json(contacts);
 });
 
@@ -41,6 +42,7 @@ router.post("/", async (req, res, next) => {
       .json({ message: `missing required ${error.details[0].path[0]} field` });
     return;
   }
+  // const { _id: owner } = req.user;
   const newContact = await Contact.create(body);
 
   res.status(201).json(newContact);
