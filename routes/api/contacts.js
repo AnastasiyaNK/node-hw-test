@@ -56,12 +56,16 @@ router.post("/", authenticate, async (req, res, next) => {
 
 router.delete("/:contactId", authenticate, async (req, res, next) => {
   const contactIdParam = req.params.contactId;
+  const { _id: owner } = req.user;
   const isValidId = isValidObjectId(contactIdParam);
   if (!isValidId) {
     res.status(400).json({ message: `${contactIdParam} isn't a valid id!` });
     return;
   }
-  const removedContact = await Contact.findByIdAndDelete(contactIdParam);
+  const removedContact = await Contact.findOneAndDelete({
+    _id: contactIdParam,
+    owner,
+  });
 
   if (!removedContact) {
     res.status(404).json({ message: "Not Found" });
@@ -109,6 +113,7 @@ router.put("/:contactId", authenticate, async (req, res, next) => {
 router.patch("/:contactId/favorite", authenticate, async (req, res, next) => {
   const contactIdParam = req.params.contactId;
   const body = req.body;
+  const { _id: owner } = req.user;
 
   if (Object.keys(req.body).length === 0) {
     res.status(400).json({ message: "missing fields" });
@@ -126,9 +131,13 @@ router.patch("/:contactId/favorite", authenticate, async (req, res, next) => {
     res.status(400).json({ message: error.details[0].message });
     return;
   }
-  const updatedContact = await Contact.findByIdAndUpdate(contactIdParam, body, {
-    new: true,
-  });
+  const updatedContact = await Contact.findOneAndUpdate(
+    { _id: contactIdParam, owner },
+    body,
+    {
+      new: true,
+    }
+  );
 
   if (!updatedContact) {
     res.status(404).json({ message: "Not Found" });

@@ -18,7 +18,7 @@ const contactBodySchema = Joi.object({
 const favoriteBodySchema = Joi.object({
   favorite: Joi.boolean()
     .required()
-    .messages({ "any.required": "missing required favorite field" }),
+    .messages({ "any.required": "missing field favorite " }),
 });
 
 const contactsSchema = new Schema(
