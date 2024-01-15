@@ -54,7 +54,10 @@ router.post("/login", async (req, res, next) => {
   try {
     const user = await User.findOne({ email: body.email });
 
-    const doesPasswordMatches = bcryptjs.compare(body.password, user.password);
+    const doesPasswordMatches = await bcryptjs.compare(
+      body.password,
+      user.password
+    );
     if (!doesPasswordMatches) {
       res.status(401).json({ message: "Email or password is wrong" });
       return;
@@ -86,9 +89,9 @@ router.post("/logout", authenticate, async (req, res, next) => {
 });
 
 router.get("/current", authenticate, async (req, res, next) => {
-  const { name, email } = req.user;
+  const { subscription, email } = req.user;
 
-  res.json({ name, email });
+  res.json({ subscription, email });
 });
 
 module.exports = router;
