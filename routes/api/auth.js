@@ -1,6 +1,11 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
+const upload = require("../../middlewares/upload");
+const path = require("path");
+const fs = require("fs/promises");
+const jimp = require("jimp");
+const gravatar = require("gravatar");
 
 const {
   registerUserSchema,
@@ -29,10 +34,12 @@ router.post("/register", async (req, res, next) => {
   }
 
   const hashedPassword = bcryptjs.hashSync(body.password, 10);
+  const avatarURL = gravatar.url(body.email);
 
   const user = await User.create({
     email: body.email,
     password: hashedPassword,
+    avatarURL,
   });
 
   res.status(201).json({
@@ -54,7 +61,10 @@ router.post("/login", async (req, res, next) => {
   try {
     const user = await User.findOne({ email: body.email });
 
-    const doesPasswordMatches = bcryptjs.compare(body.password, user.password);
+    const doesPasswordMatches = await bcryptjs.compare(
+      body.password,
+      user.password
+    );
     if (!doesPasswordMatches) {
       res.status(401).json({ message: "Email or password is wrong" });
       return;
@@ -86,9 +96,31 @@ router.post("/logout", authenticate, async (req, res, next) => {
 });
 
 router.get("/current", authenticate, async (req, res, next) => {
-  const { name, email } = req.user;
+  const { subscription, email } = req.user;
 
-  res.json({ name, email });
+  res.json({ subscription, email });
 });
+const avatarsDir = path.resolve("public", "avatars");
+router.patch(
+  "/avatars",
+  authenticate,
+  upload.single("avatar"),
+  async (req, res, next) => {
+    const { path: tempUpload, filename } = req.file;
+    const resultUpload = path.join(avatarsDir, filename);
+    await fs.rename(tempUpload, resultUpload);
+
+    jimp.read(resultUpload, (err, selectedFile) => {
+      if (err) throw err;
+      selectedFile.resize(250, 250).write(resultUpload);
+    });
+
+    const coverPath = path.join("avatars", filename);
+
+    const { _id } = req.user;
+    await User.findByIdAndUpdate(_id, { avatarURL: coverPath });
+    res.status(200).json({ avatarURL: coverPath });
+  }
+);
 
 module.exports = router;
